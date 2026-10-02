@@ -1281,12 +1281,12 @@ footer {
   overflow: hidden;
 }
 .modal-panel.has-photo .modal-head {
-  height: 100%;
   min-height: 320px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 2rem 1.8rem;
+  align-items: flex-start;
+  padding: 2.2rem;
   border-bottom: none;
   border-right: 1px solid var(--line);
 }
@@ -1326,6 +1326,8 @@ footer {
 }
 .modal-head .pc-pos-badge {
   position: relative;
+  top: auto;
+  left: auto;
   display: inline-flex;
   margin-bottom: 1rem;
   background: none;
@@ -1339,6 +1341,11 @@ footer {
 }
 .modal-body {
   padding: 2.2rem;
+}
+.modal-panel.has-photo .modal-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .modal-stats {
   display: grid;
@@ -1368,12 +1375,15 @@ footer {
 }
 .modal-bio {
   color: var(--ink-muted);
+  text-align: center;
 }
 .modal-facts {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
+  text-align: center;
   gap: 1.6rem;
-  margin-top: 1.6rem;
+  margin-top: 1.8rem;
   padding-top: 1.6rem;
   border-top: 1px solid var(--line-soft);
 }
