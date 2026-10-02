@@ -13,7 +13,7 @@ export default function SiteEffects() {
       nav?.classList.toggle("scrolled", window.scrollY > 40);
       if (!reducedMotion && emblem) {
         const y = Math.min(window.scrollY, 600);
-        emblem.style.transform = `translateY(calc(-50% + ${y * 0.18}px)) rotate(${y * 0.02}deg)`;
+        emblem.style.setProperty("--scroll-y", String(y));
       }
     };
 

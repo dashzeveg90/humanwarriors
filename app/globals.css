@@ -462,7 +462,8 @@ button {
   position: absolute;
   top: 50%;
   right: clamp(-110px, -3vw, 10px);
-  transform: translateY(-50%);
+  transform: translateY(calc(-50% + var(--scroll-y, 0) * 0.18px))
+    rotate(calc(var(--scroll-y, 0) * 0.02deg));
   width: min(64vw, 780px);
   aspect-ratio: 1/1;
   opacity: 0.8;
@@ -584,7 +585,8 @@ button {
   .hero-emblem {
     width: 100vw;
     right: 50%;
-    transform: translate(50%, -50%);
+    transform: translate(50%, calc(-50% + var(--scroll-y, 0) * 0.18px))
+      rotate(calc(var(--scroll-y, 0) * 0.02deg));
     opacity: 0.22;
   }
 }
