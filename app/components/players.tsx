@@ -35,7 +35,7 @@ function PlayerModal({
       }}
     >
       <div
-        className="modal-panel"
+        className={`modal-panel${player.img ? " has-photo" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={`${player.name} player profile`}
@@ -50,10 +50,13 @@ function PlayerModal({
             <path d="M6 6l12 12M18 6L6 18" />
           </svg>
         </button>
-        {player.img && (
-          <img className="modal-photo" src={player.img} alt="" />
-        )}
         <div className="modal-head">
+          {player.img && (
+            <>
+              <img className="modal-head-photo" src={player.img} alt="" />
+              <div className="modal-head-overlay" />
+            </>
+          )}
           <div className="modal-num">{player.num}</div>
           <div className="pc-pos-badge">
             {player.short} · {player.pos}

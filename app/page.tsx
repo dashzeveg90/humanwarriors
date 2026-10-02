@@ -1,6 +1,7 @@
 import SiteEffects from "./components/site-effects";
 import SiteNav from "./components/site-nav";
-import { Hero, Team, Footer } from "./components/site-sections";
+import { Hero, Footer } from "./components/site-sections";
+import { Team } from "./components/team";
 import News from "./components/news";
 import Players from "./components/players";
 import { getCoaches, getNews, getPlayers } from "../lib/data";

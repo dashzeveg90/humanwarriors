@@ -101,7 +101,7 @@
 
 .admin-dash-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: 1rem;
 }
 
@@ -208,7 +208,8 @@
   border: 1px solid var(--line);
   color: var(--ink);
   padding: 0.7em 0.9em;
-  font-size: 0.92rem;
+  /* 16px minimum — anything smaller makes iOS Safari zoom in on focus */
+  font-size: 16px;
   font-family: inherit;
 }
 
@@ -241,7 +242,7 @@
 
 .admin-field-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
   gap: 1.1rem;
 }
 

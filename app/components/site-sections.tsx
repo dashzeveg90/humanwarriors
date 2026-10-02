@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import type { Coach } from "../../lib/types";
 
 export function Hero({
   logoSrc = "/logo.jpg",
@@ -61,53 +60,6 @@ export function Hero({
         <span className="line" />
       </div>
     </header>
-  );
-}
-
-export function Team({
-  eyebrow = "Front Office",
-  title = (
-    <>
-      Meet The <em>Coaches</em>
-    </>
-  ),
-  coaches: roster,
-}: {
-  eyebrow?: string;
-  title?: ReactNode;
-  coaches: Coach[];
-}) {
-  return (
-    <section id="team" className="section-alt">
-      <div className="wrap">
-        <div className="section-head reveal">
-          <div>
-            <p className="eyebrow">{eyebrow}</p>
-            <h2 className="section-title">{title}</h2>
-          </div>
-        </div>
-        <div className="coach-grid">
-          {roster.map((coach) => (
-            <div className="coach-card reveal" key={coach.id}>
-              <div className="coach-top">
-                <div className="coach-portrait">
-                  {coach.img ? (
-                    <img src={coach.img} alt="" />
-                  ) : (
-                    coach.initials
-                  )}
-                </div>
-                <div>
-                  <div className="coach-name">{coach.name}</div>
-                  <div className="coach-role">{coach.role}</div>
-                </div>
-              </div>
-              <p className="coach-bio">{coach.bio}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
   );
 }
 
