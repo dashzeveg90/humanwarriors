@@ -274,17 +274,34 @@ button {
   justify-content: space-between;
   padding: 18px clamp(18px, 4vw, 48px);
   transition:
-    background 0.4s var(--ease),
     padding 0.4s var(--ease),
     border-color 0.4s;
   border-bottom: 1px solid transparent;
 }
+.nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  transition:
+    background 0.4s var(--ease),
+    backdrop-filter 0.4s var(--ease);
+  /* forces its own compositing layer so iOS Safari keeps painting
+     the blur while the page is actively scrolling, instead of only
+     after the scroll gesture ends */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+  pointer-events: none;
+}
 .nav.scrolled {
+  padding-block: 12px;
+  border-color: var(--line);
+}
+.nav.scrolled::before {
   background: rgba(12, 11, 9, 0.78);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
-  padding-block: 12px;
-  border-color: var(--line);
 }
 .nav-brand {
   display: flex;
