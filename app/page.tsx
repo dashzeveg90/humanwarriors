@@ -4,13 +4,19 @@ import { Hero, Footer } from "./components/site-sections";
 import { Team } from "./components/team";
 import News from "./components/news";
 import Players from "./components/players";
-import { getCoaches, getNews, getPlayers } from "../lib/data";
+import {
+  getCoaches,
+  getNews,
+  getPlayerPopupEnabled,
+  getPlayers,
+} from "../lib/data";
 
 export default async function HomePage() {
-  const [players, coaches, news] = await Promise.all([
+  const [players, coaches, news, playerPopup] = await Promise.all([
     getPlayers("warriors"),
     getCoaches("warriors"),
     getNews(),
+    getPlayerPopupEnabled("warriors"),
   ]);
 
   return (
@@ -32,7 +38,7 @@ export default async function HomePage() {
       <main>
         <Hero />
         <Team coaches={coaches} />
-        <Players players={players} />
+        <Players players={players} popupEnabled={playerPopup} />
         <News items={news} limit={4} moreHref="/news" />
       </main>
       <Footer />

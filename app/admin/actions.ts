@@ -304,6 +304,20 @@ export async function deletePlayer(id: string) {
   revalidatePath("/admin/players");
 }
 
+export async function setPlayerPopup(team: Team, enabled: boolean) {
+  await requireUser();
+  const supabase = await createClient();
+  const { error } = await supabase.from("site_settings").upsert({
+    key: `player_popup_${team}`,
+    value: enabled,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw new Error(error.message);
+
+  revalidateSite();
+  revalidatePath("/admin/players");
+}
+
 // ---------------------------------------------------------------------
 // Coaches
 // ---------------------------------------------------------------------

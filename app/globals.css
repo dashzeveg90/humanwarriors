@@ -831,6 +831,9 @@ section {
     transform 0.5s var(--ease),
     border-color 0.4s;
 }
+.player-card.no-popup {
+  cursor: default;
+}
 .player-card:hover,
 .player-card:focus-visible {
   transform: translateY(-8px);

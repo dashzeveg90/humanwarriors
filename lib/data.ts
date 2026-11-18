@@ -153,6 +153,23 @@ export async function getCoachById(id: string): Promise<Coach | null> {
   return data ? mapCoach(data as CoachRow) : null;
 }
 
+/**
+ * Whether clicking a player card opens the detail pop-up for this team.
+ * Defaults to on if the setting (or the site_settings table) is missing,
+ * so the site never breaks because of it.
+ */
+export async function getPlayerPopupEnabled(team: Team): Promise<boolean> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("key", `player_popup_${team}`)
+    .maybeSingle();
+
+  if (error || !data) return true;
+  return data.value !== false;
+}
+
 export async function getNews(): Promise<NewsItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase

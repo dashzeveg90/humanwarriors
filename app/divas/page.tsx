@@ -4,7 +4,12 @@ import { Hero, Footer } from "../components/site-sections";
 import { Team } from "../components/team";
 import News from "../components/news";
 import Players from "../components/players";
-import { getCoaches, getNews, getPlayers } from "../../lib/data";
+import {
+  getCoaches,
+  getNews,
+  getPlayerPopupEnabled,
+  getPlayers,
+} from "../../lib/data";
 
 export const metadata = {
   title: "Human Divas",
@@ -12,10 +17,11 @@ export const metadata = {
 };
 
 export default async function DivasPage() {
-  const [players, coaches, news] = await Promise.all([
+  const [players, coaches, news, playerPopup] = await Promise.all([
     getPlayers("divas"),
     getCoaches("divas"),
     getNews(),
+    getPlayerPopupEnabled("divas"),
   ]);
 
   return (
@@ -68,6 +74,7 @@ export default async function DivasPage() {
         />
         <Players
           players={players}
+          popupEnabled={playerPopup}
           eyebrow="2026–2027 Roster"
           title={
             <>

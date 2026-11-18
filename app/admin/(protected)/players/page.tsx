@@ -1,14 +1,21 @@
 import Link from "next/link";
-import { getPlayers } from "../../../../lib/data";
-import { deletePlayer } from "../../actions";
+import { getPlayerPopupEnabled, getPlayers } from "../../../../lib/data";
+import { deletePlayer, setPlayerPopup } from "../../actions";
 import ConfirmDeleteButton from "../../confirm-delete-button";
+import type { Team } from "../../../../lib/types";
 
 export default async function AdminPlayersPage() {
-  const [warriors, divas] = await Promise.all([
+  const [warriors, divas, warriorsPopup, divasPopup] = await Promise.all([
     getPlayers("warriors"),
     getPlayers("divas"),
+    getPlayerPopupEnabled("warriors"),
+    getPlayerPopupEnabled("divas"),
   ]);
   const players = [...warriors, ...divas];
+  const popupSettings: [Team, string, boolean][] = [
+    ["warriors", "Human Warriors", warriorsPopup],
+    ["divas", "Human Divas", divasPopup],
+  ];
 
   return (
     <>
@@ -20,6 +27,30 @@ export default async function AdminPlayersPage() {
         <Link href="/admin/players/new" className="admin-btn admin-btn-solid">
           Add Player
         </Link>
+      </div>
+      <div className="admin-settings">
+        <h2>Player detail pop-up</h2>
+        <p>
+          When off, clicking a player card on the website does nothing — the
+          roster still shows, but the detail pop-up won&apos;t open.
+        </p>
+        <div className="admin-settings-rows">
+          {popupSettings.map(([team, label, enabled]) => (
+            <form
+              key={team}
+              action={setPlayerPopup.bind(null, team, !enabled)}
+              className="admin-settings-row"
+            >
+              <span>{label}</span>
+              <span className={`admin-status ${enabled ? "on" : "off"}`}>
+                {enabled ? "On" : "Off"}
+              </span>
+              <button type="submit" className="admin-btn">
+                {enabled ? "Turn off" : "Turn on"}
+              </button>
+            </form>
+          ))}
+        </div>
       </div>
       <div className="admin-table-wrap">
         <table className="admin-table">

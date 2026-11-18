@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+} from "react";
 import type { Player } from "../../lib/types";
 
 function PlayerModal({
@@ -105,10 +110,13 @@ export default function Players({
       Meet The <em>Warriors</em>
     </>
   ),
+  popupEnabled = true,
 }: {
   players: Player[];
   eyebrow?: string;
   title?: ReactNode;
+  /** Admin switch: when false, cards don't open the detail pop-up. */
+  popupEnabled?: boolean;
 }) {
   const [activePlayer, setActivePlayer] = useState<Player | null>(null);
 
@@ -124,17 +132,19 @@ export default function Players({
         <div className="players-grid">
           {players.map((player) => (
             <article
-              className="player-card reveal"
+              className={`player-card reveal${popupEnabled ? "" : " no-popup"}`}
               key={player.id}
-              tabIndex={0}
-              role="button"
-              onClick={() => setActivePlayer(player)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  setActivePlayer(player);
-                }
-              }}
+              {...(popupEnabled && {
+                tabIndex: 0,
+                role: "button",
+                onClick: () => setActivePlayer(player),
+                onKeyDown: (event: ReactKeyboardEvent) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setActivePlayer(player);
+                  }
+                },
+              })}
             >
               {player.img && (
                 <>
@@ -168,10 +178,12 @@ export default function Players({
           ))}
         </div>
       </div>
-      <PlayerModal
-        player={activePlayer}
-        onClose={() => setActivePlayer(null)}
-      />
+      {popupEnabled && (
+        <PlayerModal
+          player={activePlayer}
+          onClose={() => setActivePlayer(null)}
+        />
+      )}
     </section>
   );
 }

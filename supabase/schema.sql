@@ -75,6 +75,19 @@ update public.news
   set images = array[img]
   where img is not null and cardinality(images) = 0;
 
+-- Site-wide switches managed from the admin panel (e.g. turning the
+-- player detail pop-up on/off per team).
+create table if not exists public.site_settings (
+  key text primary key,
+  value jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
+insert into public.site_settings (key, value) values
+  ('player_popup_warriors', 'true'),
+  ('player_popup_divas', 'true')
+on conflict (key) do nothing;
+
 create index if not exists players_team_idx on public.players (team, sort_order);
 create index if not exists coaches_team_idx on public.coaches (team, sort_order);
 create index if not exists news_date_idx on public.news (date desc);
@@ -106,6 +119,17 @@ create policy "Public can read coaches" on public.coaches
 
 drop policy if exists "Authenticated can write coaches" on public.coaches;
 create policy "Authenticated can write coaches" on public.coaches
+  for all using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
+
+alter table public.site_settings enable row level security;
+
+drop policy if exists "Public can read site settings" on public.site_settings;
+create policy "Public can read site settings" on public.site_settings
+  for select using (true);
+
+drop policy if exists "Authenticated can write site settings" on public.site_settings;
+create policy "Authenticated can write site settings" on public.site_settings
   for all using (auth.role() = 'authenticated')
   with check (auth.role() = 'authenticated');
 
