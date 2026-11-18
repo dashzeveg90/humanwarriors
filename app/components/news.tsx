@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { NewsItem } from "../../lib/types";
+import ShareButtons from "./share-buttons";
 
 // Two rows on desktop (4 per row); "Show more" reveals the next batch.
 const PAGE_SIZE = 8;
@@ -88,9 +89,11 @@ function NewsGallery({ images }: { images: string[] }) {
 
 function NewsModal({
   item,
+  basePath,
   onClose,
 }: {
   item: NewsItem | null;
+  basePath: string;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -143,6 +146,7 @@ function NewsModal({
           <div className="news-modal-scroll">
             <p className="news-modal-text">{item.body || item.excerpt}</p>
           </div>
+          <ShareButtons path={`${basePath}/${item.id}`} title={item.title} />
         </div>
       </div>
     </div>
@@ -160,6 +164,8 @@ export default function News({
   limit,
   moreHref,
   asPage = false,
+  basePath,
+  initialId,
 }: {
   items: NewsItem[];
   eyebrow?: string;
@@ -170,8 +176,33 @@ export default function News({
   moreHref?: string;
   /** Standalone news page: h1 heading and room for the fixed nav. */
   asPage?: boolean;
+  /** Where story links live, e.g. "/news" → "/news/<id>". */
+  basePath?: string;
+  /** Open this story on load (shared-link landing page). */
+  initialId?: string;
 }) {
-  const [activeItem, setActiveItem] = useState<NewsItem | null>(null);
+  const storyBase = basePath ?? moreHref ?? "/news";
+  const [activeItem, setActiveItem] = useState<NewsItem | null>(
+    () => items.find((item) => item.id === initialId) ?? null,
+  );
+  // URL to return to when the pop-up closes. A shared-link landing page
+  // falls back to the full news list rather than the story URL itself.
+  const closedPathRef = useRef<string | null>(initialId ? storyBase : null);
+
+  // Keep the address bar on the open story so it can be copied/shared.
+  useEffect(() => {
+    const { pathname, search, hash } = window.location;
+    const current = pathname + search + hash;
+    if (closedPathRef.current === null) closedPathRef.current = current;
+    const target = activeItem
+      ? `${storyBase}/${activeItem.id}`
+      : closedPathRef.current;
+    if (current !== target) {
+      window.history.replaceState(null, "", target);
+    }
+  }, [activeItem, storyBase]);
+
+  const closeModal = useCallback(() => setActiveItem(null), []);
   const [visible, setVisible] = useState(limit ?? PAGE_SIZE);
 
   if (items.length === 0) return null;
@@ -247,7 +278,11 @@ export default function News({
           )
         )}
       </div>
-      <NewsModal item={activeItem} onClose={() => setActiveItem(null)} />
+      <NewsModal
+        item={activeItem}
+        basePath={storyBase}
+        onClose={closeModal}
+      />
     </section>
   );
 }
