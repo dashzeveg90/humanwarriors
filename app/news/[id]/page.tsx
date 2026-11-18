@@ -7,7 +7,7 @@ type Props = { params: Promise<{ id: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const item = await findStory(id);
-  return item ? storyMetadata(item, "Human Warriors") : {};
+  return item ? storyMetadata(item, "Human Warriors", `/news/${id}`) : {};
 }
 
 export default async function WarriorsStoryPage({ params }: Props) {
