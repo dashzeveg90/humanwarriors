@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "../../../../../../lib/supabase/server";
 import { updateNews } from "../../../../actions";
+import { newsImages } from "../../../../../../lib/data";
 import NewsForm from "../../news-form";
 
 export default async function EditNewsPage({
@@ -34,7 +35,7 @@ export default async function EditNewsPage({
           title: item.title,
           excerpt: item.excerpt,
           body: item.body ?? "",
-          img: item.img ?? "",
+          images: newsImages(item),
           featured: item.featured,
         }}
         submitLabel="Save Changes"

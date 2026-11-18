@@ -1,8 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 type FormState = { error: string } | undefined;
+
+const MAX_IMAGES = 10;
 
 export type NewsFormValues = {
   tag: string;
@@ -10,7 +12,7 @@ export type NewsFormValues = {
   title: string;
   excerpt: string;
   body: string;
-  img: string;
+  images: string[];
   featured: boolean;
 };
 
@@ -24,6 +26,8 @@ export default function NewsForm({
   submitLabel?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const currentImages = initial?.images ?? [];
 
   return (
     <form action={formAction} className="admin-form">
@@ -78,19 +82,56 @@ export default function NewsForm({
       </div>
 
       <div className="admin-field">
-        <label htmlFor="image">Image (optional)</label>
-        {initial?.img && (
-          <div className="admin-image-preview">
-            <img src={initial.img} alt="" />
+        <label htmlFor="images">
+          Images (optional, up to {MAX_IMAGES}) — Instagram size, 1080×1350
+          (4:5). The first image is the cover.
+        </label>
+
+        {currentImages.length > 0 && (
+          <div className="admin-image-grid">
+            {currentImages.map((src, i) => (
+              <div className="admin-image-tile" key={src}>
+                <img src={src} alt="" />
+                {i === 0 && <span className="admin-image-badge">Cover</span>}
+                <input type="hidden" name="current_images" value={src} />
+                <label className="admin-image-remove">
+                  <input type="checkbox" name="remove_images" value={src} />
+                  Remove
+                </label>
+              </div>
+            ))}
           </div>
         )}
-        <input id="image" name="image" type="file" accept="image/*" />
-        <input type="hidden" name="current_img" value={initial?.img ?? ""} />
-        {initial?.img && (
-          <div className="admin-field admin-field-check">
-            <input id="remove_image" name="remove_image" type="checkbox" />
-            <label htmlFor="remove_image">Remove current image</label>
-          </div>
+
+        <input
+          id="images"
+          name="images"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(event) => {
+            const files = Array.from(event.target.files ?? []);
+            setNewPreviews((prev) => {
+              prev.forEach((url) => URL.revokeObjectURL(url));
+              return files.map((file) => URL.createObjectURL(file));
+            });
+          }}
+        />
+
+        {newPreviews.length > 0 && (
+          <>
+            <p className="admin-hint">
+              New images to upload ({newPreviews.length}) — added after the
+              current ones:
+            </p>
+            <div className="admin-image-grid">
+              {newPreviews.map((src) => (
+                <div className="admin-image-tile" key={src}>
+                  <img src={src} alt="" />
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

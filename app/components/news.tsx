@@ -1,7 +1,90 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { NewsItem } from "../../lib/types";
+
+// Two rows on desktop (4 per row); "Show more" reveals the next batch.
+const PAGE_SIZE = 8;
+
+function NewsGallery({ images }: { images: string[] }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(0);
+
+  const goTo = (i: number) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const next = (i + images.length) % images.length;
+    track.scrollTo({ left: next * track.clientWidth, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (images.length < 2) return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft") goTo(index - 1);
+      if (event.key === "ArrowRight") goTo(index + 1);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  });
+
+  return (
+    <div className="news-gallery">
+      <div
+        className="news-gallery-track"
+        ref={trackRef}
+        onScroll={(event) => {
+          const track = event.currentTarget;
+          setIndex(Math.round(track.scrollLeft / track.clientWidth));
+        }}
+      >
+        {images.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt={`Photo ${i + 1} of ${images.length}`}
+            loading={i === 0 ? "eager" : "lazy"}
+          />
+        ))}
+      </div>
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            className="news-gallery-arrow prev"
+            onClick={() => goTo(index - 1)}
+            aria-label="Previous photo"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M15 6l-6 6 6 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="news-gallery-arrow next"
+            onClick={() => goTo(index + 1)}
+            aria-label="Next photo"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </button>
+          <div className="news-gallery-dots">
+            {images.map((src, i) => (
+              <button
+                type="button"
+                key={src}
+                className={i === index ? "active" : ""}
+                onClick={() => goTo(i)}
+                aria-label={`Show photo ${i + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 function NewsModal({
   item,
@@ -35,7 +118,7 @@ function NewsModal({
       }}
     >
       <div
-        className="modal-panel"
+        className={`modal-panel news-modal${item.images.length ? "" : " no-photo"}`}
         role="dialog"
         aria-modal="true"
         aria-label={`${item.title} article`}
@@ -50,16 +133,16 @@ function NewsModal({
             <path d="M6 6l12 12M18 6L6 18" />
           </svg>
         </button>
-        {item.img && (
-          <img className="modal-photo" src={item.img} alt="" />
-        )}
-        <div className="modal-head">
-          <span className="news-tag">{item.tag}</span>
-          <div className="news-date">{item.date}</div>
-          <div className="modal-name">{item.title}</div>
-        </div>
-        <div className="modal-body">
-          <p className="modal-bio">{item.body || item.excerpt}</p>
+        {item.images.length > 0 && <NewsGallery images={item.images} />}
+        <div className="news-modal-content">
+          <div className="news-modal-head">
+            <span className="news-tag">{item.tag}</span>
+            <div className="news-date">{item.date}</div>
+            <h3 className="news-modal-title">{item.title}</h3>
+          </div>
+          <div className="news-modal-scroll">
+            <p className="news-modal-text">{item.body || item.excerpt}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -74,59 +157,95 @@ export default function News({
       From The <em>Locker Room</em>
     </>
   ),
+  limit,
+  moreHref,
+  asPage = false,
 }: {
   items: NewsItem[];
   eyebrow?: string;
   title?: ReactNode;
+  /** Preview mode (home page): show only this many stories. */
+  limit?: number;
+  /** Link for the "View all news" button shown in preview mode. */
+  moreHref?: string;
+  /** Standalone news page: h1 heading and room for the fixed nav. */
+  asPage?: boolean;
 }) {
   const [activeItem, setActiveItem] = useState<NewsItem | null>(null);
+  const [visible, setVisible] = useState(limit ?? PAGE_SIZE);
 
-  const featured = items.find((item) => item.featured) ?? items[0];
-  const stories = items.filter((item) => item.id !== featured?.id);
+  if (items.length === 0) return null;
 
-  if (!featured) return null;
+  // Featured stories first, then newest first (items arrive date-sorted).
+  const ordered = [
+    ...items.filter((item) => item.featured),
+    ...items.filter((item) => !item.featured),
+  ];
+  const shown = ordered.slice(0, visible);
 
   return (
-    <section id="news">
+    <section id="news" className={asPage ? "news-page" : undefined}>
       <div className="wrap">
         <div className="section-head reveal">
           <div>
             <p className="eyebrow">{eyebrow}</p>
-            <h2 className="section-title">{title}</h2>
+            {asPage ? (
+              <h1 className="section-title">{title}</h1>
+            ) : (
+              <h2 className="section-title">{title}</h2>
+            )}
           </div>
         </div>
-        <div className="news-grid">
-          <button
-            type="button"
-            className="news-feature reveal"
-            onClick={() => setActiveItem(featured)}
-          >
-            {featured.img && (
-              <img src={featured.img} alt="" />
-            )}
-            <div className="news-feature-body">
-              <span className="news-tag">{featured.tag}</span>
-              <div className="news-date">{featured.date}</div>
-              <h3 className="news-title">{featured.title}</h3>
-              <p className="news-excerpt">{featured.excerpt}</p>
-            </div>
-          </button>
-          <div className="news-list reveal">
-            {stories.map((item) => (
-              <button
-                type="button"
-                className="news-card"
-                key={item.id}
-                onClick={() => setActiveItem(item)}
-              >
+        <div className={`news-grid reveal${limit ? " preview" : ""}`}>
+          {shown.map((item) => (
+            <button
+              type="button"
+              className="news-post"
+              key={item.id}
+              onClick={() => setActiveItem(item)}
+            >
+              <div className="news-post-media">
+                {item.images[0] ? (
+                  <img src={item.images[0]} alt="" loading="lazy" />
+                ) : (
+                  <span className="news-post-placeholder">{item.tag}</span>
+                )}
+                {item.images.length > 1 && (
+                  <span className="news-photo-count">
+                    {item.images.length} photos
+                  </span>
+                )}
+              </div>
+              <div className="news-post-body">
                 <span className="news-tag">{item.tag}</span>
                 <div className="news-date">{item.date}</div>
-                <h4 className="news-title">{item.title}</h4>
+                <h3 className="news-title">{item.title}</h3>
                 <p className="news-excerpt">{item.excerpt}</p>
-              </button>
-            ))}
-          </div>
+              </div>
+            </button>
+          ))}
         </div>
+        {moreHref ? (
+          <div className="news-more">
+            <Link href={moreHref}>
+              View all news
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </Link>
+          </div>
+        ) : (
+          ordered.length > visible && (
+            <div className="news-more">
+              <button
+                type="button"
+                onClick={() => setVisible((v) => v + PAGE_SIZE)}
+              >
+                Show more news
+              </button>
+            </div>
+          )
+        )}
       </div>
       <NewsModal item={activeItem} onClose={() => setActiveItem(null)} />
     </section>

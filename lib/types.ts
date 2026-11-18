@@ -39,5 +39,6 @@ export type NewsItem = {
   title: string;
   excerpt: string;
   body: string | null;
-  img: string | null;
+  /** All photos for the story; the first one is the cover. */
+  images: string[];
 };

@@ -41,7 +41,16 @@ type NewsRow = {
   excerpt: string;
   body: string | null;
   img: string | null;
+  images?: string[] | null;
 };
+
+export function newsImages(row: {
+  img: string | null;
+  images?: string[] | null;
+}): string[] {
+  if (row.images && row.images.length > 0) return row.images;
+  return row.img ? [row.img] : [];
+}
 
 function mapPlayer(row: PlayerRow): Player {
   return {
@@ -91,7 +100,7 @@ function mapNews(row: NewsRow): NewsItem {
     title: row.title,
     excerpt: row.excerpt,
     body: row.body,
-    img: row.img,
+    images: newsImages(row),
   };
 }
 

@@ -74,12 +74,17 @@ export function Footer({
       Development League, based in Ulaanbaatar, Mongolia.
     </>
   ),
+  social = {
+    instagram: "https://www.instagram.com/human_warriors4/",
+    facebook: "https://www.facebook.com/profile.php?id=61585762520990",
+  },
 }: {
   logoSrc?: string;
   logoAlt?: string;
   brandName?: string;
   tagline?: string;
   description?: ReactNode;
+  social?: { instagram: string; facebook: string };
 } = {}) {
   return (
     <footer id="contact">
@@ -95,7 +100,12 @@ export function Footer({
           </div>
           <p className="foot-desc">{description}</p>
           <div className="foot-social">
-            <a href="#contact" aria-label="Instagram">
+            <a
+              href={social.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+            >
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -107,7 +117,12 @@ export function Footer({
                 <circle cx="17.2" cy="6.8" r="1" />
               </svg>
             </a>
-            <a href="#contact" aria-label="Facebook">
+            <a
+              href={social.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+            >
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -115,31 +130,6 @@ export function Footer({
                 strokeWidth="1.6"
               >
                 <path d="M14 9h3V5h-3a4 4 0 0 0-4 4v2H8v4h2v6h4v-6h3l1-4h-4V9a1 1 0 0 1 1-1z" />
-              </svg>
-            </a>
-            <a href="#contact" aria-label="YouTube">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-              >
-                <rect x="2.5" y="6" width="19" height="12" rx="3" />
-                <path
-                  d="M10.5 9.5l5 2.5-5 2.5z"
-                  fill="currentColor"
-                  stroke="none"
-                />
-              </svg>
-            </a>
-            <a href="#contact" aria-label="X">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-              >
-                <path d="M4 4l16 16M20 4L4 20" />
               </svg>
             </a>
           </div>

@@ -39,6 +39,8 @@ export default async function DivasPage() {
         brandTop="HUMAN"
         brandBottom="DIVAS"
         brandSub="Est. 2026 · MBA"
+        homeHref="/divas"
+        newsHref="/divas/news"
         secondaryCta={{ label: "Human Warriors", href: "/" }}
       />
       <main>
@@ -73,7 +75,7 @@ export default async function DivasPage() {
             </>
           }
         />
-        <News items={news} />
+        <News items={news} limit={4} moreHref="/divas/news" />
       </main>
       <Footer
         logoSrc="/divaslogo.jpg"
@@ -81,6 +83,10 @@ export default async function DivasPage() {
         brandName="HUMAN DIVAS"
         tagline="Rise Together · Play Fearless"
         description="A women's professional basketball club competing in the MBA's M Development League, based in Ulaanbaatar, Mongolia."
+        social={{
+          instagram: "https://www.instagram.com/human_divas/",
+          facebook: "https://www.facebook.com/profile.php?id=61594004103907",
+        }}
       />
       <SiteEffects />
     </>

@@ -33,7 +33,7 @@ export default async function HomePage() {
         <Hero />
         <Team coaches={coaches} />
         <Players players={players} />
-        <News items={news} />
+        <News items={news} limit={4} moreHref="/news" />
       </main>
       <Footer />
       <SiteEffects />

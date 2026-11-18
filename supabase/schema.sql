@@ -68,6 +68,13 @@ create table if not exists public.news (
   created_at timestamptz not null default now()
 );
 
+-- News can carry several photos (shown as a gallery). `img` is kept in
+-- sync with the first photo (the cover) for backward compatibility.
+alter table public.news add column if not exists images text[] not null default '{}';
+update public.news
+  set images = array[img]
+  where img is not null and cardinality(images) = 0;
+
 create index if not exists players_team_idx on public.players (team, sort_order);
 create index if not exists coaches_team_idx on public.coaches (team, sort_order);
 create index if not exists news_date_idx on public.news (date desc);

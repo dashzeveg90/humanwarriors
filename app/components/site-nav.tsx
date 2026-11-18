@@ -3,15 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 
-const links: [label: string, href: string][] = [
-  ["Home", "#top"],
-  ["Team", "#team"],
-  ["Players", "#players"],
-  ["News", "#news"],
-  ["Contact", "#contact"],
-];
-
 export default function SiteNav({
+  homeHref = "/",
+  newsHref = "/news",
   logoSrc = "/logo.jpg",
   logoAlt = "Human Warriors crest",
   brandTop = "HUMAN",
@@ -25,12 +19,26 @@ export default function SiteNav({
   brandBottom?: string;
   brandSub?: string;
   secondaryCta?: { label: string; href: string } | null;
+  /** The team's home page; section links point at its anchors. */
+  homeHref?: string;
+  /** The full news page. */
+  newsHref?: string;
 } = {}) {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Anchors are prefixed with the home path so they also work from
+  // other pages (e.g. /news). Contact is the footer, present everywhere.
+  const links: [label: string, href: string][] = [
+    ["Home", `${homeHref}#top`],
+    ["Team", `${homeHref}#team`],
+    ["Players", `${homeHref}#players`],
+    ["News", newsHref],
+    ["Contact", "#contact"],
+  ];
+
   return (
     <nav className="nav" id="siteNav">
-      <a href="#top" className="nav-brand">
+      <a href={`${homeHref}#top`} className="nav-brand">
         <img src={logoSrc} alt={logoAlt} />
         <span className="word">
           {brandTop}
@@ -61,7 +69,7 @@ export default function SiteNav({
             {secondaryCta.label}
           </Link>
         )}
-        <a href="#players" className="btn btn-outline">
+        <a href={`${homeHref}#players`} className="btn btn-outline">
           Roster
         </a>
         <button

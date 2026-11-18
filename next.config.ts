@@ -3,7 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
-      bodySizeLimit: "8mb",
+      // News stories can upload several photos (up to 5MB each) at once.
+      bodySizeLimit: "50mb",
     },
   },
 };

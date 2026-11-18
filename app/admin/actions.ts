@@ -37,6 +37,8 @@ export async function signOut() {
 function revalidateSite() {
   revalidatePath("/");
   revalidatePath("/divas");
+  revalidatePath("/news");
+  revalidatePath("/divas/news");
 }
 
 function str(formData: FormData, key: string) {
@@ -79,6 +81,39 @@ async function uploadImage(
 // News
 // ---------------------------------------------------------------------
 
+const MAX_NEWS_IMAGES = 10;
+
+// Keeps the existing photos (minus any ticked for removal) and appends
+// newly uploaded ones. The first photo in the list is the cover.
+async function collectNewsImages(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  formData: FormData,
+): Promise<string[]> {
+  const removed = new Set(formData.getAll("remove_images").map(String));
+  const kept = formData
+    .getAll("current_images")
+    .map(String)
+    .filter((url) => url && !removed.has(url));
+
+  const files = formData
+    .getAll("images")
+    .filter((f): f is File => f instanceof File && f.size > 0);
+
+  if (kept.length + files.length > MAX_NEWS_IMAGES) {
+    throw new Error(`A story can have at most ${MAX_NEWS_IMAGES} images.`);
+  }
+  for (const file of files) {
+    if (file.size > MAX_IMAGE_BYTES) {
+      throw new Error(`"${file.name}" is too large (max 5MB per image).`);
+    }
+  }
+
+  const uploaded = await Promise.all(
+    files.map((file) => uploadImage(supabase, file, "news")),
+  );
+  return [...kept, ...uploaded];
+}
+
 export async function createNews(
   _prevState: FormState,
   formData: FormData,
@@ -86,16 +121,13 @@ export async function createNews(
   await requireUser();
   const supabase = await createClient();
 
-  let img: string | null = null;
-  const file = formData.get("image");
-  if (file instanceof File && file.size > 0) {
-    try {
-      img = await uploadImage(supabase, file, "news");
-    } catch (err) {
-      return {
-        error: err instanceof Error ? err.message : "Image upload failed",
-      };
-    }
+  let images: string[];
+  try {
+    images = await collectNewsImages(supabase, formData);
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : "Image upload failed",
+    };
   }
 
   const { error } = await supabase.from("news").insert({
@@ -105,7 +137,8 @@ export async function createNews(
     title: str(formData, "title"),
     excerpt: str(formData, "excerpt"),
     body: str(formData, "body") || null,
-    img,
+    images,
+    img: images[0] ?? null,
   });
 
   if (error) return { error: error.message };
@@ -123,20 +156,13 @@ export async function updateNews(
   await requireUser();
   const supabase = await createClient();
 
-  let img = str(formData, "current_img") || null;
-  if (formData.get("remove_image") === "on") {
-    img = null;
-  }
-
-  const file = formData.get("image");
-  if (file instanceof File && file.size > 0) {
-    try {
-      img = await uploadImage(supabase, file, "news");
-    } catch (err) {
-      return {
-        error: err instanceof Error ? err.message : "Image upload failed",
-      };
-    }
+  let images: string[];
+  try {
+    images = await collectNewsImages(supabase, formData);
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : "Image upload failed",
+    };
   }
 
   const { error } = await supabase
@@ -148,7 +174,8 @@ export async function updateNews(
       title: str(formData, "title"),
       excerpt: str(formData, "excerpt"),
       body: str(formData, "body") || null,
-      img,
+      images,
+      img: images[0] ?? null,
     })
     .eq("id", id);
 
